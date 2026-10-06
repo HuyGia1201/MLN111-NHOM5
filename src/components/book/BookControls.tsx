@@ -36,7 +36,7 @@ export function BookControls(p: Props) {
       <button className="ctrl-btn" onClick={p.onStop} disabled={p.reading === "idle"} aria-label="Dừng hẳn"><Square size={15} /></button>
       <button
         className="ctrl-btn text-xs"
-        onClick={() => p.onRate(RATES[(RATES.indexOf(p.rate) + 1) % RATES.length])}
+        onClick={() => p.onRate(RATES[(RATES.indexOf(p.rate) + 1) % RATES.length] ?? 1)}
         aria-label={`Tốc độ đọc ${p.rate}x`}
       >{p.rate}x</button>
       <span className="mx-1 h-6 w-px bg-[var(--border)]" aria-hidden />

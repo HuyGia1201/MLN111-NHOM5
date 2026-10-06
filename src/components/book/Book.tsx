@@ -54,7 +54,7 @@ export function Book() {
   useLayoutEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width, h: e.contentRect.height }));
+    const ro = new ResizeObserver(([e]) => e && setBox({ w: e.contentRect.width, h: e.contentRect.height }));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -119,7 +119,7 @@ export function Book() {
       const tok = tokenRef.current;
       setReading("playing");
       setReadingPage(p);
-      speech.speak(bookPages[p].narration, () => {
+      speech.speak(bookPages[p]!.narration, () => {
         if (tok !== tokenRef.current) return;
         const n = p + 1;
         if (n >= N) return stopReading();
@@ -217,12 +217,13 @@ export function Book() {
 
   const touch = useRef<{ x: number; y: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
-    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const t0 = e.touches[0]; if (t0) touch.current = { x: t0.clientX, y: t0.clientY };
   };
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (!touch.current) return;
-    const dx = e.changedTouches[0].clientX - touch.current.x;
-    const dy = e.changedTouches[0].clientY - touch.current.y;
+    const t1 = e.changedTouches[0];
+    if (!touch.current || !t1) return;
+    const dx = t1.clientX - touch.current.x;
+    const dy = t1.clientY - touch.current.y;
     touch.current = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? next : prev)();
   };
@@ -362,7 +363,7 @@ export function Book() {
   }
 
   const infoPages =
-    page === 0 ? [bookPages[0]] : desktop ? [bookPages[page], bookPages[page + 1]].filter(Boolean) : [bookPages[page]];
+    page === 0 ? [bookPages[0]!] : desktop ? [bookPages[page], bookPages[page + 1]].filter((x): x is BookPage => !!x) : [bookPages[page]].filter((x): x is BookPage => !!x);
   const label =
     page === 0 ? "Bìa" : desktop && page + 1 < N ? `${page + 1}–${page + 2} / ${N}` : `${page + 1} / ${N}`;
 
