@@ -1,24 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Book } from "@/components/book/Book";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Tha hóa & Giải phóng con người — Sách số MLN111" },
+      { name: "description", content: "Sách số infographic tương tác mục 3.5.2: Hiện tượng tha hóa con người và vấn đề giải phóng con người (MLN111)." },
+      { property: "og:title", content: "Tha hóa & Giải phóng con người — Sách số MLN111" },
+      { property: "og:description", content: "Lật trang, nghe thuyết minh và tải PDF cuốn sách số triết học MLN111 mục 3.5.2." },
+      { property: "og:type", content: "book" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Book,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
