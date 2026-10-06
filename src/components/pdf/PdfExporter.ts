@@ -8,7 +8,7 @@ export async function exportBookPdf(container: HTMLElement, onProgress?: (n: num
   const H = 297;
   for (let i = 0; i < pages.length; i++) {
     onProgress?.(i + 1, pages.length);
-    const canvas = await html2canvas(pages[i], { scale: 2, backgroundColor: null, useCORS: true });
+    const canvas = await html2canvas(pages[i]!, { scale: 2, backgroundColor: null, useCORS: true });
     const img = canvas.toDataURL("image/jpeg", 0.92);
     if (i > 0) pdf.addPage();
     const ratio = canvas.width / canvas.height;
