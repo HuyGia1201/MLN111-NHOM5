@@ -232,7 +232,7 @@ export function Book() {
   const ph = desktop ? (pw * PAGE_H) / PAGE_W : box.h;
   const scale = pw / PAGE_W;
 
-  const Slot = ({ p, side }: { p?: BookPage; side: "left" | "right" | "single" }) => {
+  const Slot = ({ p, side }: { p?: BookPage | undefined; side: "left" | "right" | "single" }) => {
     if (!p)
       return (
         <div className={`paper ${side === "right" ? "page-right" : "page-left"} flex h-full w-full items-center justify-center`}>
