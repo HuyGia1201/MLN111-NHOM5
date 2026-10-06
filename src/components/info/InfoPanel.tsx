@@ -17,12 +17,14 @@ export function InfoPanel({ pages, onClose }: { pages: BookPage[]; onClose: () =
             <X size={18} />
           </button>
         </div>
-        {pages.map((p) => (
-          <section key={p.id} className="mt-6 border-t-2 border-[var(--ink)] pt-3">
-            <div className="font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.2em] text-[var(--ink-soft)]">
-              {p.section} · Trang {p.pageNumber}/12
-            </div>
-            <h3 className="mt-1 font-[family-name:var(--font-display)] text-xl font-bold leading-tight">{p.title}</h3>
+        {pages.map((p) => {
+          const pageLabel = p.pageNumber === 1 ? "Bìa trước" : p.pageNumber === 12 ? "Bìa sau" : `Trang ${p.pageNumber - 1}/10`;
+          return (
+            <section key={p.id} className="mt-6 border-t-2 border-[var(--ink)] pt-3">
+              <div className="font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.2em] text-[var(--ink-soft)]">
+                {p.section} · {pageLabel}
+              </div>
+              <h3 className="mt-1 font-[family-name:var(--font-display)] text-xl font-bold leading-tight">{p.title}</h3>
             <dl className="mt-3 space-y-3 text-sm leading-relaxed">
               <div>
                 <dt className="font-[family-name:var(--font-label)] font-bold uppercase tracking-wider text-[var(--burgundy)]">Mục đích</dt>
@@ -31,13 +33,13 @@ export function InfoPanel({ pages, onClose }: { pages: BookPage[]; onClose: () =
               <div>
                 <dt className="font-[family-name:var(--font-label)] font-bold uppercase tracking-wider text-[var(--burgundy)]">Nguồn ví dụ</dt>
                 <dd>
-                  {p.hasIllustrativeExample && <span className="pg-tag mb-1 mr-1">Ví dụ minh họa</span>}
                   {p.exampleNote}
                 </dd>
               </div>
             </dl>
           </section>
-        ))}
+          );
+        })}
         <p className="mt-8 text-xs text-[var(--ink-soft)]">Phím tắt: ← → lật trang · Home/End · Space đọc/dừng · Esc đóng.</p>
       </aside>
     </div>

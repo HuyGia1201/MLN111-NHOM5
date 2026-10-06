@@ -47,8 +47,19 @@ export function Book() {
   desktopRef.current = desktop;
 
   const turnMs = useRef(800);
+  const flipAudioRef = useRef<HTMLAudioElement | null>(null);
+  
   useEffect(() => {
     turnMs.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 30 : 800;
+    flipAudioRef.current = new Audio("/page-flip.mp3");
+    flipAudioRef.current.volume = 0.35;
+  }, []);
+
+  const playFlip = useCallback(() => {
+    if (flipAudioRef.current) {
+      flipAudioRef.current.currentTime = 0;
+      flipAudioRef.current.play().catch(() => {});
+    }
   }, []);
 
   useLayoutEffect(() => {
@@ -76,6 +87,9 @@ export function Book() {
       const cur = pageRef.current;
       const t = startOf(Math.max(0, Math.min(N - 1, target)), desktopRef.current);
       if (t === cur) return resolve(true);
+      
+      playFlip();
+      
       if (t === 0) {
         setPage(0);
         return resolve(true);
@@ -99,7 +113,7 @@ export function Book() {
         resolve(true);
       }, turnMs.current);
     });
-  }, []);
+  }, [playFlip]);
 
   const visible = (p: number) => {
     const s = pageRef.current;
@@ -154,7 +168,7 @@ export function Book() {
   const step = desktop ? 2 : 1;
   const next = () => userNav(page === 0 ? 1 : page + step);
   const prev = () => userNav(page <= 1 ? 0 : page - step);
-  const first = () => userNav(page === 0 ? 0 : 1);
+  const first = () => userNav(0);
   const last = () => userNav(N - 1);
   const lastStart = startOf(N - 1, desktop);
   const canPrev = page > 0;
@@ -234,12 +248,7 @@ export function Book() {
   const scale = pw / PAGE_W;
 
   const Slot = ({ p, side }: { p?: BookPage | undefined; side: "left" | "right" | "single" }) => {
-    if (!p)
-      return (
-        <div className={`paper ${side === "right" ? "page-right" : "page-left"} flex h-full w-full items-center justify-center`}>
-          <span className="pg-kicker opacity-40">— Hết —</span>
-        </div>
-      );
+    if (!p) return null;
     if (desktop)
       return (
         <div className="h-full w-full overflow-hidden">
@@ -264,9 +273,14 @@ export function Book() {
   let content: ReactNode;
   if (desktop) {
     const closed = page === 0 && opening === null;
+    const closedBack = page === N - 1 && turning === null;
+    const isTurningToEnd = turning?.to === N - 1;
+
     let layers: ReactNode;
     if (closed) {
       layers = half(false, <Slot p={bookPages[0]} side="right" />, "book-shadow cursor-pointer");
+    } else if (closedBack) {
+      layers = half(true, <Slot p={bookPages[N - 1]} side="left" />, "book-shadow cursor-pointer");
     } else if (opening !== null) {
       layers = (
         <>
@@ -310,19 +324,26 @@ export function Book() {
         </>
       );
     }
+
+    const transformX = closed
+      ? `translateX(-${pw / 2}px)`
+      : closedBack || isTurningToEnd
+      ? `translateX(${pw / 2}px)`
+      : "translateX(0)";
+
     content = (
       <div
-        className={`book-stage relative ${closed ? "" : "book-shadow"}`}
+        className={`book-stage relative ${closed || closedBack ? "" : "book-shadow"}`}
         style={{
           width: pw * 2,
           height: ph,
-          transform: closed ? `translateX(-${pw / 2}px)` : "translateX(0)",
+          transform: transformX,
           transition: "transform 900ms cubic-bezier(0.645,0.045,0.355,1)",
         }}
-        onClick={closed ? () => userNav(1) : undefined}
+        onClick={closed ? () => userNav(1) : closedBack ? () => userNav(N - 3) : undefined}
       >
         {layers}
-        {!closed && <div aria-hidden className="pointer-events-none absolute top-0 h-full w-[2px] bg-[oklch(0_0_0/0.25)]" style={{ left: pw - 1 }} />}
+        {!(closed || closedBack) && <div aria-hidden className="pointer-events-none absolute top-0 h-full w-[2px] bg-[oklch(0_0_0/0.25)]" style={{ left: pw - 1 }} />}
       </div>
     );
   } else {
@@ -365,7 +386,13 @@ export function Book() {
   const infoPages =
     page === 0 ? [bookPages[0]!] : desktop ? [bookPages[page], bookPages[page + 1]].filter((x): x is BookPage => !!x) : [bookPages[page]].filter((x): x is BookPage => !!x);
   const label =
-    page === 0 ? "Bìa" : desktop && page + 1 < N ? `${page + 1}–${page + 2} / ${N}` : `${page + 1} / ${N}`;
+    page === 0
+      ? "Bìa trước"
+      : page === N - 1
+      ? "Bìa sau"
+      : desktop && page + 1 < N - 1
+      ? `${page}–${page + 1} / ${N - 2}`
+      : `${page} / ${N - 2}`;
 
   return (
     <div className="flex h-[100dvh] flex-col">

@@ -6,9 +6,7 @@ const toneCls: Record<Tone, string> = {
   paper: "chip-paper",
 };
 
-export function IllustrativeTag() {
-  return <span className="pg-tag">◇ Ví dụ minh họa</span>;
-}
+
 
 export function BlockRenderer({ block }: { block: SectionBlock }) {
   switch (block.type) {
@@ -111,13 +109,25 @@ export function BlockRenderer({ block }: { block: SectionBlock }) {
         <div className={`relative border-[1.5px] p-[0.8em] ${block.illustrative ? "border-dashed border-[var(--burgundy)]" : "border-[var(--ink)]"}`}>
           <div className="mb-[0.3em] flex flex-wrap items-center gap-[0.5em]">
             <span className="pg-label text-[var(--burgundy)]">{block.title}</span>
-            {block.illustrative && <IllustrativeTag />}
           </div>
           <p className="pg-body">{block.text}</p>
         </div>
       );
     case "map":
       return <ConceptMap block={block} />;
+    case "image": {
+      const mw = block.maxWidth ?? "70%";
+      return (
+        <figure className="relative mx-auto overflow-hidden border-[1.5px] border-[var(--ink)]" style={{ maxWidth: mw }}>
+          <img src={block.src} alt={block.caption || ""} className="w-full h-auto object-cover" />
+          {block.caption && (
+            <figcaption className="bg-[var(--paper-deep)] border-t-[1.5px] border-[var(--ink)] pg-small p-[0.5em] text-center text-[0.85em]">
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
     case "loop":
       return <Loop block={block} />;
   }
